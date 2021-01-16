@@ -1,0 +1,274 @@
+
+{% load static %}
+{% include 'head.html'%}
+
+<body>
+<div id="gatsby-focus-wrapper" style="outline: none;" tabindex="-1">
+
+{% load static %}
+{% include 'header.html'%}
+
+
+    <div class="site-wrapper">
+        <main>
+            <div class="small-container">
+                <div id="chartdiv"></div>
+            </div>
+
+            <div class="full-container">
+                 <div class="table-wrapper">
+                    <table id="example" class="stripe row-border order-column table-stripped  table" style="width:100%">
+                         <thead>
+                             <tr style="background:black;">
+
+                                 <th>Country or Other</th>
+                                 <th>Total Cases</th>
+                                 <th>New Cases</th>
+                                 <th>Total Death</th>
+                                 <th>New Death</th>
+                                 <th>Total Recovered</th>
+                                 <th>Active Cases</th>
+                                 <th>Seriouse critical</th>
+                                 <th>Tot Cases/1M pop</th>
+                                 <th>Deaths/1M pop</th>
+                                 <th>Total Test</th>
+                                 <th>Test/1M pop</th>
+                                 <th>Country Population</th>
+                             </tr>
+                         </thead>
+                        <tbody>
+                            {% if world is not None %}
+                             {% for wc19 in  world%}
+                        <tr class="odd text-center" role="row" style="">
+
+                            <td>
+                                <a class="mt_a" href="{% url 'c19:country' wc19.id %}">{{wc19.name}}</a>
+                            </td>
+                            <td>{{wc19.total_cases}}</td>
+                            {% if wc19.new_cases  %}
+                            <td style="font-weight: bold; text-align:right;background-color:#FFEEAA;">{{wc19.new_cases}}</td>
+                            {% else %}
+                             <td class="text-right">0</td>
+                            {% endif %}
+
+                            <td style="font-weight: bold; text-align:right;">{{wc19.total_death}}</td>
+                             {% if wc19.new_death  %}
+                            <td style="
+                                    text-align:right;background-color:red; color:white">{{wc19.new_death}}
+                            </td>
+                            {% else %}
+                             <td class="text-right">0</td>
+                            {% endif %}
+                            <td style="font-weight: bold; text-align:right">{{wc19.total_recovered}}</td>
+
+                            <td >{{wc19.active_cases}}</td>
+                            <td >{{wc19.serious_critical}}</td>
+                            <td>{{wc19.total_cases_1m_pop}}</td>
+                            <td >{{wc19.deaths_1m_pop}}</td>
+                            <td >{{wc19.total_test}}</td>
+                            <td >{{wc19.test_1m_pop}}</td>
+                            <td>
+                               {{wc19.population}}
+                            </td>
+
+                        </tr>
+                         {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="full-container">
+                <iframe src="https://public.domo.com/cards/bWxVg" width="100%" height="600" marginheight="0" marginwidth="0" frameborder="0"></iframe>
+            </div>
+            {% block vaccine %}
+        </main>
+    </div>
+  {% include 'footer.html' %}
+</div>
+<script>
+    $(document).ready(function() {
+    $('#c19-table').DataTable();
+} );
+</script>
+
+<script>
+/**
+ * ---------------------------------------
+ * This demo was created using amCharts 4.
+ *
+ * For more information visit:
+ * https://www.amcharts.com/
+ *
+ * Documentation is available at:
+ * https://www.amcharts.com/docs/v4/
+ * ---------------------------------------
+ */
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        var chart = am4core.create("chartdiv", am4maps.MapChart);
+
+        // Set map definition
+        chart.geodata = am4geodata_worldLow;
+
+        // Set projection
+        chart.projection = new am4maps.projections.Orthographic();
+        chart.panBehavior = "rotateLongLat";
+        chart.deltaLatitude = -20;
+        chart.padding(20,20,20,20);
+
+        // limits vertical rotation
+        chart.adapter.add("deltaLatitude", function(delatLatitude){
+            return am4core.math.fitToRange(delatLatitude, -90, 90);
+        })
+
+        // Create map polygon series
+        var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+
+        // Make map load polygon (like country names) data from GeoJSON
+        polygonSeries.useGeodata = true;
+
+        // Configure series
+        var polygonTemplate = polygonSeries.mapPolygons.template;
+        polygonTemplate.tooltipText = "{name}";
+        polygonTemplate.fill = am4core.color("#545454");
+        polygonTemplate.stroke = am4core.color("#eee");
+        polygonTemplate.strokeWidth = 0.5;
+
+        var graticuleSeries = chart.series.push(new am4maps.GraticuleSeries());
+        graticuleSeries.mapLines.template.line.stroke = am4core.color("#ffffff");
+        graticuleSeries.mapLines.template.line.strokeOpacity = 0.08;
+        graticuleSeries.fitExtent = false;
+
+        chart.backgroundSeries.mapPolygons.template.polygon.fillOpacity = 0.1;
+        chart.backgroundSeries.mapPolygons.template.polygon.fill = am4core.color("#ffffff");
+
+        // Create hover state and set alternative fill color
+        var hs = polygonTemplate.states.create("hover");
+        hs.properties.fill = chart.colors.getIndex(0).brighten(-0.5);
+
+        let animation;
+        setTimeout(function(){
+          animation = chart.animate({property:"deltaLongitude", to:100000}, 20000000);
+        }, 3000)
+
+        chart.seriesContainer.events.on("down", function(){
+        if(animation){
+          animation.stop();
+        }
+
+})
+
+</script>
+
+<script>
+/**
+ * ---------------------------------------
+ * This demo was created using amCharts 4.
+ *
+ * For more information visit:
+ * https://www.amcharts.com/
+ *
+ * Documentation is available at:
+ * https://www.amcharts.com/docs/v4/
+ * ---------------------------------------
+ */
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("chartdiv-1", am4maps.MapChart);
+
+// Set map definition
+chart.geodata = am4geodata_worldLow;
+
+// Set projection
+chart.projection = new am4maps.projections.Orthographic();
+chart.panBehavior = "rotateLongLat";
+chart.deltaLatitude = -20;
+chart.padding(20,20,20,20);
+
+// limits vertical rotation
+chart.adapter.add("deltaLatitude", function(delatLatitude){
+    return am4core.math.fitToRange(delatLatitude, -90, 90);
+})
+
+// Create map polygon series
+var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+
+// Make map load polygon (like country names) data from GeoJSON
+polygonSeries.useGeodata = true;
+
+// Configure series
+var polygonTemplate = polygonSeries.mapPolygons.template;
+polygonTemplate.tooltipText = "{name}";
+polygonTemplate.fill = am4core.color("#545454");
+polygonTemplate.stroke = am4core.color("#eee");
+polygonTemplate.strokeWidth = 0.5;
+
+var graticuleSeries = chart.series.push(new am4maps.GraticuleSeries());
+graticuleSeries.mapLines.template.line.stroke = am4core.color("#ffffff");
+graticuleSeries.mapLines.template.line.strokeOpacity = 0.08;
+graticuleSeries.fitExtent = false;
+
+chart.backgroundSeries.mapPolygons.template.polygon.fillOpacity = 0.1;
+chart.backgroundSeries.mapPolygons.template.polygon.fill = am4core.color("#ffffff");
+
+// Create hover state and set alternative fill color
+var hs = polygonTemplate.states.create("hover");
+hs.properties.fill = chart.colors.getIndex(0).brighten(-0.5);
+
+let animation;
+setTimeout(function(){
+  animation = chart.animate({property:"deltaLongitude", to:100000}, 20000000);
+}, 3000)
+
+chart.seriesContainer.events.on("down", function(){
+if(animation){
+  animation.stop();
+}
+
+})
+
+</script>
+
+
+
+<!--<script>-->
+<!--    let url = 'https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits';-->
+<!--let response =  fetch(url);-->
+<!--for (int a=0;response)-->
+<!--alert(" test ",response)-->
+
+<!--alert(" test ")-->
+<!--let commits =  response.json(); // read response body and parse as JSON-->
+<!--alert(commits)-->
+<!--alert(commits[0].author.login);-->
+<!--</script>-->
+
+{% endblock %}
+<div class="mypanel"></div>
+    <script>
+    $.getJSON('http://time.jsontest.com', function(data) {
+        var text = data.date
+    });
+    </script>
+</body>
+<script>
+        $(document).ready(function() {
+        var table = $('#example').DataTable({
+            scrollY:        "900px",
+            scrollX:        true,
+            scrollCollapse: true,
+            paging:         false,
+            fixedColumns:   {
+                leftColumns: 1,
+                rightColumns: 0,
+            }
+        });
+    });
+    </script>

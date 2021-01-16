@@ -1,0 +1,3025 @@
+
+{% load static %}
+{% include 'head.html'%}
+<body style="background-color: #d7d8d9;">
+<div id="gatsby-focus-wrapper" style="outline: none;" tabindex="-1">
+
+
+{% include 'header.html'%}
+<style>
+.map-marker {
+    /* adjusting for the marker dimensions
+    so that it is centered on coordinates */
+    margin-left: -8px;
+    margin-top: -8px;
+    box-sizing: border-box;
+}
+.map-marker.map-clickable {
+    cursor: pointer;
+}
+.pulse {
+    width: 10px;
+    height: 10px;
+    border: 5px solid #f7f14c;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+    background-color: #716f42;
+    z-index: 10;
+    position: absolute;
+    box-sizing: border-box;
+}
+.map-marker .dot {
+    border: 10px solid #fff601;
+    background: transparent;
+    -webkit-border-radius: 60px;
+    -moz-border-radius: 60px;
+    border-radius: 60px;
+    height: 50px;
+    width: 50px;
+    -webkit-animation: pulse 3s ease-out;
+    -moz-animation: pulse 3s ease-out;
+    animation: pulse 3s ease-out;
+    -webkit-animation-iteration-count: infinite;
+    -moz-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    z-index: 1;
+    opacity: 0;
+    box-sizing: border-box;
+}
+@-moz-keyframes pulse {
+   0% {
+      -moz-transform: scale(0);
+      opacity: 0.0;
+   }
+   25% {
+      -moz-transform: scale(0);
+      opacity: 0.1;
+   }
+   50% {
+      -moz-transform: scale(0.1);
+      opacity: 0.3;
+   }
+   75% {
+      -moz-transform: scale(0.5);
+      opacity: 0.5;
+   }
+   100% {
+      -moz-transform: scale(1);
+      opacity: 0.0;
+   }
+  }
+  @-webkit-keyframes "pulse" {
+   0% {
+      -webkit-transform: scale(0);
+      opacity: 0.0;
+   }
+   25% {
+      -webkit-transform: scale(0);
+      opacity: 0.1;
+   }
+   50% {
+      -webkit-transform: scale(0.1);
+      opacity: 0.3;
+   }
+   75% {
+      -webkit-transform: scale(0.5);
+      opacity: 0.5;
+   }
+   100% {
+      -webkit-transform: scale(1);
+      opacity: 0.0;
+   }
+}
+
+    td.population-td.sorting_1 {
+    font-size: 11px;
+}
+span.color-1.mr-2 {
+    background: #ff3b37;
+    padding: 13px;
+    border-radius: 13px 12px 1px 3px;
+}
+span.color-2.mr-2 {
+    background: #fe983f;
+    padding: 13px;
+    border-radius: 3px 1px -4px -4px;
+}
+span.color-3.mr-2 {
+    background: #ffca3d;
+    padding: 13px;
+}
+span.color-4.mr-2 {
+    background: #52d475;
+    padding: 13px;
+}
+span.color-4.mr-2 {
+        background: #52d475;
+    padding: 13px;
+    border-radius: 0px 0px 12px 11px;
+}
+.ec-base {
+    display: flex;
+    width: 100%;
+}
+@media screen and (max-width:400px){
+.ec-base {
+    display: table;
+    width: 100%;
+    margin-right: 56%;
+}
+}
+
+</style>
+
+    <div class="site-wrapper mt-5">
+        <main>
+            <div class="small-container  ">
+                <div class="section-layout section-layout-padding"><h2 class="section-title">The Impact of COVID-19 in
+                    the United States</h2><h6 class="section-subtitle">This information covers confirmed data and does
+                    not indicate the actual numbers of infected or non infected residents of the United States.</h6>
+                    <p class="section-date">Last updated: {{updated_date.date}}<p>
+                    <p class="section-paragrapgh">During the last {time period} a total of {{updated_date.total_cases}} Total Test
+                        Results} tests for COVID were administered. Of that total, {{updated_date.total_cases}} Negative} tests for COVID
+                        were confirmed negative. There are currently {{updated_date.date}} Cases} confirmed positives cases of
+                        COVID-19 in the United States, of which {4,415 Pending} in a pending status.</p>
+                    <p class="section-paragrapgh">The outcome of all the testing means that there are now {{ updated_date.serious_critical}}
+                        Currently} hospital beds occupied because of CoVID-19. The good news is that  {{updated_date.total_recovered}}
+                        Recovered} people have recovered from CoVID-19.</p>
+                    <p class="section-paragrapgh">Unfortunately, {{updated_date.total_death}} people have lost their lives due to
+                        CoVID since January 2020. </p></div>
+            </div>
+            <div class="small-container">
+
+                <div class="section-layout section-layout-padding"><h2 class="section-title">United States CoVID-19 Risk
+                    Levels from 5 Key Indicators</h2>
+                    <div class="heat-indicater">
+                        <h6 class="my-3"><b>RISK LEVELS</b></h6>
+                        <ul style="list-style: none;">
+
+                        <li><span class="color-1 mr-2"></span>Active or imminent outbreak</li>
+
+                          <li><span class="color-2 mr-2"></span>At risk of outbreak</li>
+
+                          <li><span class="color-3 mr-2"></span>Slow disease growth</li>
+
+                          <li><span class="color-4 mr-2"></span>On track to contain COVID CNMI</li>
+
+                      </ul>
+                    </div>
+
+                </div>
+                <div id="usstatemap"></div>
+
+            </div>
+            <div class="full-container">
+                <div class="small-container   no-bottom-padding">
+                    <div class="section-layout section-layout-padding"><h2 class="section-title">Key Indicators to
+                        Determine COVID-19 Risk Levels</h2><h6 class="section-subtitle">This model is based on a
+                        traditional SEIR model by Dr. Alison Hill at Harvard.</h6>
+                        <p class="section-date">Last updated: {{updated_date.date}}. ET</p>
+                        <p class="section-paragrapgh">What’s an SEIR model? An SEIR model tracks the flow of people
+                            between four states: susceptible (S), exposed (E), infected (I), and recovered (R).</p>
+                        <p class="section-paragrapgh">What’s an SEIR model? An SEIR model tracks the flow of people
+                            between four states: susceptible (S), exposed (E), infected (I), and recovered (R). </p>
+                        <p class="section-paragrapgh">Models try to predict things such as how a disease spreads, or the
+                            total number infected, or the duration of an epidemic, and to estimate various
+                            epidemiological parameters such as the reproductive number. Such models can show how
+                            different public health interventions may affect the outcome of the epidemic, e.g., what the
+                            most efficient technique is for issuing a limited number of vaccines in a given
+                            population.</p></div>
+                </div>
+
+                    <div class="chart-slider">
+                         <div class="vaccineWrapper">
+                             <div class="row">
+                                <div class="covidVaccineStagesAndPhases">
+                                     <div class="ec-base col-sm-4">
+                                        <div class="chart-card">
+                                        <h4 class="chart-card-title">Daily New Cases</h4><h6
+                                                class="chart-card-subtitle">Daily new cases per 100,00</h6>
+                                            <p class="chart-card-description">Over the last week, {State Name} has averaged
+                                                {Cases} new confirmed cases of COVID-19 per day.</p>
+                                            <div class="chart-area">
+                                                <div id="daily-new-cases-chart" style="width: 100%; height: 300px;">
+                                                    <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                                       <div id="keyindicator"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <div class="ec-base col-sm-4 ">
+                                            <div class="chart-card"><h4 class="chart-card-title"><h4 class="chart-card-title">Recovered Cases</h4><h6
+                                                    class="chart-card-subtitle">Daily new cases per 100,00</h6>
+                                                <p class="chart-card-description">Per best available data, {Country Name} is likely
+                                                    able to trace only 5% of new COVID infections in 48 hours.</p>
+                                                <div class="chart-area">
+                                                    <div id="daily-new-cases-chart" style="width: 100%; height: 300px;">
+                                                        <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                                           <div id="keyindicator2"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                     <div class="ec-base col-sm-4">
+                                            <div class="chart-card"><h4 class="chart-card-title">Infection Rate</h4><h6
+                                                    class="chart-card-subtitle">Daily new cases per 100,00</h6>
+                                                <p class="chart-card-description">On average, each person in {State Name} with COVID
+                                                    is infecting 0.90 other people. </p>
+                                                <div class="chart-area">
+                                                    <div id="daily-new-cases-chart" style="width: 100%; height: 300px;">
+                                                        <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                                           <div id="keyindicator3"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                     <div  class="ec-base col-sm-4 ">
+                                        <div class="chart-card"><h4 class="chart-card-title">Positive Test Rate</h4><h6
+                                                class="chart-card-subtitle">Daily new cases per 100,00</h6>
+                                            <p class="chart-card-description">Currently, {XY%} of {State Name}’s tests for
+                                                COVID-19 were positive.</p>
+                                            <div class="chart-area">
+                                                <div id="daily-new-cases-chart" style="width: 100%; height: 300px;">
+                                                    <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                                       <div id="keyindicator4"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <div  class="ec-base col-sm-4 ">
+                                        <div class="chart-card"><h4 class="chart-card-title">Hospital Usage</h4><h6
+                                                class="chart-card-subtitle">Daily new cases per 100,00</h6>
+                                            <p class="chart-card-description">Based on best available data, we estimate that
+                                                {State Name} has about 2,730 ICU beds. 51% (1,405) are currently occupied by
+                                                non-COVID patients.</p>
+                                            <div class="chart-area">
+                                                <div id="daily-new-cases-chart" style="width: 100%; height: 300px;">
+                                                    <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                                       <div id="keyindicator5"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+
+            </div>
+            <div class="small-container   ">
+                <div class="section-layout section-layout-padding"><h2 class="section-title">State Comparison</h2><h6
+                        class="section-subtitle">5 key indicators to determine risk levels</h6>
+                    <p class="section-date">Last updated: {{updated_date.date}}. ET </p>
+                    <p class="section-paragrapgh">COVID in is spreading in a slow and controlled fashion, and New York’s
+                        COVID preparedness meets international standards.</p></div>
+                <div class="table-wrapper">
+                    <table id="example" class="stripe row-border order-column table-stripped  table" style="width:100%">
+                         <thead>
+                             <tr style="background:black;">
+                                 <th>State Population</th>
+                                 <th>Daily New Cases per 100k</th>
+                                 <th>Infection Rate</th>
+                                 <th>Positive Test Rate</th>
+                                 <th>ICU Headroom Used</th>
+                                 <th>Tracers Hired</th>
+                             </tr>
+                         </thead>
+                        <tbody>
+                        {% block tablecontent %}
+                {% load mathfilters %}
+                        {% if allState  %}
+                        {% for onestate in allState  %}
+                                                    <tr>
+                            <td class="population-td"><a class="city-name"><span
+                                    class="circle circle-darkorange"></span><a href="{% url 'c19:states' onestate.state %}">{{onestate.state}}</a></span>
+                                <span class="population">{{onestate.actuals_cases}}</span></a>
+                            </td>
+                            <td><span class="circle circle-darkorange"></span>{{onestate.metrics_caseDensity | floatformat:2 }}</td>
+                            <td><span class="circle circle-yellow"></span>{{onestate.metrics_infectionRate | floatformat:2}}</td>
+                            <td><span class="circle circle-darkorange"></span>{{onestate.metrics_testPositivityRatio|mul:100  | floatformat:2 }} %</td>
+                            <td><span class="circle circle-green"></span>{{onestate.metrics_icuHeadroomRatio|mul:100 | floatformat:2 }}%</td>
+                            <td><span class="circle circle-darkorange"></span>{{   onestate.metrics_contactTracerCapacityRatio|mul:100 |floatformat:2 }}%</td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                        {% endblock %}
+                        </tbody>
+                    </table>
+                    <!--                    -->
+<!--                    <table class="table sortable-table">-->
+<!--                        <thead>-->
+<!--                        <tr>-->
+<!--                            <th>State Population-->
+<!--                                <div class="table-acc-dec">-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-down fa-w-14 table-sort ascending disable " data-icon="chevron-down" data-prefix="fas"-->
+<!--                                         focusable="false"-->
+<!--                                         role="img" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-up fa-w-14 table-sort descending  " data-icon="chevron-up" data-prefix="fas"-->
+<!--                                         focusable="false" role="img"-->
+<!--                                         viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                </div>-->
+<!--                            </th>-->
+<!--                            <th>Daily New Cases per 100k-->
+<!--                                <div class="table-acc-dec">-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-down fa-w-14 table-sort ascending  " data-icon="chevron-down" data-prefix="fas"-->
+<!--                                         focusable="false"-->
+<!--                                         role="img" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-up fa-w-14 table-sort descending  " data-icon="chevron-up" data-prefix="fas"-->
+<!--                                         focusable="false" role="img"-->
+<!--                                         viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                </div>-->
+<!--                            </th>-->
+<!--                            <th>Infection Rate-->
+<!--                                <div class="table-acc-dec">-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-down fa-w-14 table-sort ascending  " data-icon="chevron-down" data-prefix="fas"-->
+<!--                                         focusable="false"-->
+<!--                                         role="img" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-up fa-w-14 table-sort descending  " data-icon="chevron-up" data-prefix="fas"-->
+<!--                                         focusable="false" role="img"-->
+<!--                                         viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                </div>-->
+<!--                            </th>-->
+<!--                            <th>Positive Test Rate-->
+<!--                                <div class="table-acc-dec">-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-down fa-w-14 table-sort ascending  " data-icon="chevron-down" data-prefix="fas"-->
+<!--                                         focusable="false"-->
+<!--                                         role="img" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-up fa-w-14 table-sort descending  " data-icon="chevron-up" data-prefix="fas"-->
+<!--                                         focusable="false" role="img"-->
+<!--                                         viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                </div>-->
+<!--                            </th>-->
+<!--                            <th>ICU Headroom Used-->
+<!--                                <div class="table-acc-dec">-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-down fa-w-14 table-sort ascending  " data-icon="chevron-down" data-prefix="fas"-->
+<!--                                         focusable="false"-->
+<!--                                         role="img" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-up fa-w-14 table-sort descending  " data-icon="chevron-up" data-prefix="fas"-->
+<!--                                         focusable="false" role="img"-->
+<!--                                         viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                </div>-->
+<!--                            </th>-->
+<!--                            <th>Tracers Hired-->
+<!--                                <div class="table-acc-dec">-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-down fa-w-14 table-sort ascending  " data-icon="chevron-down" data-prefix="fas"-->
+<!--                                         focusable="false"-->
+<!--                                         role="img" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                    <svg aria-hidden="true" class="svg-inline&#45;&#45;fa fa-chevron-up fa-w-14 table-sort descending  " data-icon="chevron-up" data-prefix="fas"-->
+<!--                                         focusable="false" role="img"-->
+<!--                                         viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">-->
+<!--                                        <path d="M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z"-->
+<!--                                              fill="currentColor"></path>-->
+<!--                                    </svg>-->
+<!--                                </div>-->
+<!--                            </th>-->
+<!--                        </tr>-->
+<!--                        </thead>-->
+<!--                        <tbody>-->
+<!--                        {% block tablecontent11 %}-->
+<!--                        {% if allState  %}-->
+<!--                        {% for onestate in allState  %}-->
+
+<!--                        <tr>-->
+<!--                            <td class="population-td"><span class="city-name"><span-->
+<!--                                    class="circle circle-darkorange"></span>{{onestate.state}}</span>-->
+<!--                                <span class="population">{{onestate.actuals_cases}}</span>-->
+<!--                            </td>-->
+<!--                            <td><span class="circle circle-darkorange"></span>{{onestate.actuals_cases}}</td>-->
+<!--                            <td><span class="circle circle-yellow"></span>{{onestate.metrics_infectionRate}}</td>-->
+<!--                            <td><span class="circle circle-darkorange"></span>{{onestate.metrics_infectionRate}} %</td>-->
+<!--                            <td><span class="circle circle-green"></span>{{onestate.metrics_testPositivityRatio}}%</td>-->
+<!--                            <td><span class="circle circle-darkorange"></span>{{onestate.actuals_contactTracers}}%</td>-->
+<!--                        </tr>-->
+
+<!--                        {% endfor %}-->
+<!--                        {% endif %}-->
+<!--                        {% endblock %}-->
+
+<!--                        </tbody>-->
+<!--                    </table>-->
+                </div>
+            </div>
+            <div class="small-container ">
+
+                <div class="section-layout section-layout-padding"><h2 class="section-title">Economic Impact of CoVID-19
+                    on the United States</h2><h6 class="section-subtitle">In the United States, as of June 27 2020,
+                    employment rates decreased by 6.8% compared to January 2020.</h6>
+                    <p class="section-date">Last updated: {{updated_date.date}}. ET</p>
+                    <p class="section-paragrapgh">What’s an SEIR model? An SEIR model tracks the flow of people between
+                        four states: susceptible (S), exposed (E), infected (I), and recovered (R).</p></div>
+                <div class="chart-slider">
+                     <div class="vaccineWrapper">
+                        <div class="row">
+                        <div class="covidVaccineStagesAndPhases">
+                            <div  class="ec-base col-sm-12">
+                               <div class="singleline-chart-card-wrapper">
+                                 <div class="single-chart-card"><h4 class="chart-card-title">US Changes in Employment </h4><h6
+                                        class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                                    <div class="chart-card-paragraph"><p>Over the last week, USA has averaged {Cases} new
+                                        confirmed cases of COVID-19 per day (34.2 for every 100,000 residents)</p>
+                                        <p>Low Income ($27,000 or less)</p>
+                                    </div>
+                                    <div class="chart-area">
+                                        <div id="economic-impact-chart" style="width: 100%; height: 300px;">
+                                            <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: -0.265625px;">
+                                                <div id="lineChart_economic"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div  class="ec-base col-sm-12">
+                               <div class="singleline-chart-card-wrapper">
+                                 <div class="single-chart-card"><h4 class="chart-card-title">US Changes in Employment </h4><h6
+                                        class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                                    <div class="chart-card-paragraph"><p>Over the last week, USA has averaged {Cases} new
+                                        confirmed cases of COVID-19 per day (34.2 for every 100,000 residents)</p>
+                                        <p> Middle Income ($27,000 to $60,000)</p>
+                                    </div>
+                                    <div class="chart-area">
+                                        <div id="economic-impact-chart" style="width: 100%; height: 300px;">
+                                            <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: -0.265625px;">
+                                                <div id="lineChart_economic_2"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div  class="ec-base col-sm-12">
+                               <div class="singleline-chart-card-wrapper">
+                                 <div class="single-chart-card"><h4 class="chart-card-title">US Changes in Employment </h4><h6
+                                        class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                                    <div class="chart-card-paragraph"><p>Over the last week, USA has averaged {Cases} new
+                                        confirmed cases of COVID-19 per day (34.2 for every 100,000 residents)</p>
+                                        <p>  High Income (&gt;$60,000))</p>
+                                    </div>
+                                    <div class="chart-area">
+                                        <div id="economic-impact-chart" style="width: 100%; height: 300px;">
+                                            <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: -0.265625px;">
+                                                <div id="lineChart_economic_3"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                     </div>
+                 </div>
+            </div>
+            <div class="full-container">
+                <div class="small-container   no-bottom-padding">
+                    <div class="section-layout section-layout-padding"><h2 class="section-title">United States Mobility Indicators</h2>
+                        <p class="section-paragrapgh">What’s an SEIR model? An SEIR model tracks the flow of people
+                            between four states: susceptible (S), exposed (E), infected (I), and recovered (R).
+                        </p>
+                        <p class="section-paragrapgh">Models try to predict things such as how a disease spreads, or the
+                            total number infected, or the duration of an epidemic, and to estimate various
+                            epidemiological parameters such as the reproductive number. Such models can show how
+                            different public health interventions may affect the outcome of the epidemic, e.g., what the
+                            most efficient technique is for issuing a limited number of vaccines in a given
+                            population.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-slider">
+                 <div class="vaccineWrapper">
+                     <div class="row">
+                        <div class="covidVaccineStagesAndPhases">
+                            <div  class="ec-base col-sm-4">
+                                <div class="chart-card"><h4 class="chart-card-title">Retail & Recreation</h4>
+                                    <div class="chart-area">
+                                        <div id="daily-new-cases-chart">
+                                            <div>
+                                               <div id="lineChart1"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ec-base col-sm-4">
+                                <div class="chart-card"><h4 class="chart-card-title">Residential</h4>
+                                    <div class="chart-area">
+                                        <div id="daily-new-cases-chart">
+                                            <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                               <div id="lineChart2"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ec-base col-sm-4">
+                                <div class="chart-card"><h4 class="chart-card-title">Grocery & Pharmacy </h4>
+                                    <div class="chart-area">
+                                        <div id="daily-new-cases-chart" >
+                                            <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                               <div id="lineChart3"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ec-base col-sm-4">
+                                <div class="chart-card"><h4 class="chart-card-title">Parks</h4>
+                                    <div class="chart-area">
+                                        <div id="daily-new-cases-chart">
+                                            <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                               <div id="lineChart4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ec-base col-sm-4">
+                                <div class="chart-card"><h4 class="chart-card-title">Transit Stations</h4>
+                                    <div class="chart-area">
+                                        <div id="daily-new-cases-chart" >
+                                            <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                               <div id="lineChart5"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ec-base col-sm-4">
+                                <div class="chart-card"><h4 class="chart-card-title">Workplaces</h4>
+                                    <div class="chart-area">
+                                        <div id="daily-new-cases-chart" >
+                                            <div style="width: 100%; height: 100%; position: relative; left: 0.25px; top: 0.125px;">
+                                               <div id="lineChart6"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="small-container   ">
+                <div class="section-layout section-layout-padding"><h2 class="section-title">United States Consumer
+                    Spending Habits</h2>
+                    <p class="section-date">Last updated: {{updated_date.date}}                   <p class="section-paragrapgh">What’s an SEIR model? An SEIR model tracks the flow of people between
+                        four states: susceptible (S), exposed (E), infected (I), and recovered (R).</p></div>
+                <div class="chart-slider">
+                     <div class="vaccineWrapper">
+                        <div class="row">
+                        <div class="covidVaccineStagesAndPhases">
+                            <div  class="ec-base col-sm-12">
+                              <div class="singleline-chart-card-wrapper">
+                    <div class="single-chart-card"><h4 class="chart-card-title">United States changes in All Consumer
+                        Spending</h4><h6 class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                        <div class="chart-card-paragraph"><p>In the United States, as of August 02 2020, grocery
+                            spending by all consumers increased by 9.7% compared to January 2020.)</p>
+                            <p>Apparel &amp; General Merchandise, Entertainment &amp; Recreation, Grocery, Healthcare,
+                                Restaurants &amp; Hospitality, and Transportation</p></div>
+
+
+                        <div class="chart-area">
+                            <div id="consumer-spending-chart" style="width: 100%; height: 300px;">
+                                <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: 0.34375px;">
+                                    <div id="lineChart_consumer"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+                            <div  class="ec-base col-sm-12">
+                               <div class="singleline-chart-card-wrapper">
+                    <div class="single-chart-card"><h4 class="chart-card-title">United States changes in All Consumer
+                        Spending</h4><h6 class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                        <div class="chart-card-paragraph"><p>In the United States, as of August 02 2020, grocery
+                            spending by all consumers increased by 9.7% compared to January 2020.)</p>
+                            <p>Apparel &amp; General Merchandise, Entertainment &amp; Recreation, Grocery, Healthcare,
+                                Restaurants &amp; Hospitality, and Transportation</p></div>
+
+
+                        <div class="chart-area">
+                            <div id="consumer-spending-chart" style="width: 100%; height: 300px;">
+                                <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: 0.34375px;">
+                                    <div id="lineChart_consumer_2"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+                            <div  class="ec-base col-sm-12">
+                              <div class="singleline-chart-card-wrapper">
+                    <div class="single-chart-card"><h4 class="chart-card-title">United States changes in All Consumer
+                        Spending</h4><h6 class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                        <div class="chart-card-paragraph"><p>In the United States, as of August 02 2020, grocery
+                            spending by all consumers increased by 9.7% compared to January 2020.)</p>
+                            <p>Apparel &amp; General Merchandise, Entertainment &amp; Recreation, Grocery, Healthcare,
+                                Restaurants &amp; Hospitality, and Transportation</p></div>
+
+
+                        <div class="chart-area">
+                            <div id="consumer-spending-chart" style="width: 100%; height: 300px;">
+                                <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: 0.34375px;">
+                                    <div id="lineChart_consumer_3"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+                             <div  class="ec-base col-sm-12">
+                              <div class="singleline-chart-card-wrapper">
+                    <div class="single-chart-card"><h4 class="chart-card-title">United States changes in All Consumer
+                        Spending</h4><h6 class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                        <div class="chart-card-paragraph"><p>In the United States, as of August 02 2020, grocery
+                            spending by all consumers increased by 9.7% compared to January 2020.)</p>
+                            <p>Apparel &amp; General Merchandise, Entertainment &amp; Recreation, Grocery, Healthcare,
+                                Restaurants &amp; Hospitality, and Transportation</p></div>
+
+
+                        <div class="chart-area">
+                            <div id="consumer-spending-chart" style="width: 100%; height: 300px;">
+                                <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: 0.34375px;">
+                                    <div id="lineChart_consumer_4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+                             <div  class="ec-base col-sm-12">
+                              <div class="singleline-chart-card-wrapper">
+                    <div class="single-chart-card"><h4 class="chart-card-title">United States changes in All Consumer
+                        Spending</h4><h6 class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                        <div class="chart-card-paragraph"><p>In the United States, as of August 02 2020, grocery
+                            spending by all consumers increased by 9.7% compared to January 2020.)</p>
+                            <p>Apparel &amp; General Merchandise, Entertainment &amp; Recreation, Grocery, Healthcare,
+                                Restaurants &amp; Hospitality, and Transportation</p></div>
+
+
+                        <div class="chart-area">
+                            <div id="consumer-spending-chart" style="width: 100%; height: 300px;">
+                                <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: 0.34375px;">
+                                    <div id="lineChart_consumer_5"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+                        </div>
+                    </div>
+                     </div>
+                </div>
+            </div>
+            <div class="full-container">
+                <div class="small-container   ">
+                    <div class="section-layout section-layout-padding"><h2 class="section-title">United States News</h2>
+                        <p class="section-paragrapgh">What’s an SEIR model? An SEIR model tracks the flow of people
+                            between four states: susceptible (S), exposed (E), infected (I), and recovered (R). </p>
+                    </div>
+                </div>
+                 <div class="blog-slider">
+                    <div class="vaccineWrapper">
+                        <div class="covidVaccineStagesAndPhases">
+                            <div class="ec-base">
+                                <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item--active image-item"
+                                data-index="0"
+                                style="flex: 1 1 auto; position: relative; width: 339px;">
+                                <div class="blog-card"
+                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">
+                                    <div class="blog-card-seprator"></div>
+                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>
+                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected Patients tests for
+                                            COVID were administered.</p><a class="blog-card-readnow" href="/singleblog/News Title">Read Now</a>
+                                        <p class="blog-card-source"><b>Source:</b>
+                                            <a href="https://www.google.com/"rel="noreferrer" target="_blank">Source Link</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="ec-base">
+                                <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item--active image-item"
+                                data-index="0"
+                                style="flex: 1 1 auto; position: relative; width: 339px;">
+                                <div class="blog-card"
+                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">
+                                    <div class="blog-card-seprator"></div>
+                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>
+                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected
+                                            Patients tests for
+                                            COVID were administered.</p><a class="blog-card-readnow"
+                                                                           href="/singleblog/News Title">Read Now</a>
+                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"
+                                                                                      rel="noreferrer" target="_blank">Source
+                                            Link</a></p></div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="ec-base">
+                                 <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item--active image-item"
+                                data-index="2"
+                                style="flex: 1 1 auto; position: relative; width: 339px;">
+                                <div class="blog-card"
+                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">
+                                    <div class="blog-card-seprator"></div>
+                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>
+                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected
+                                            Patients tests for
+                                            COVID were administered.</p><a class="blog-card-readnow"
+                                                                           href="/singleblog/News Title">Read Now</a>
+                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"
+                                                                                      rel="noreferrer" target="_blank">Source
+                                            Link</a></p></div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="ec-base">
+                                 <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item--active image-item"
+                                data-index="2"
+                                style="flex: 1 1 auto; position: relative; width: 339px;">
+                                <div class="blog-card"
+                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">
+                                    <div class="blog-card-seprator"></div>
+                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>
+                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected
+                                            Patients tests for
+                                            COVID were administered.</p><a class="blog-card-readnow"
+                                                                           href="/singleblog/News Title">Read Now</a>
+                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"
+                                                                                      rel="noreferrer" target="_blank">Source
+                                            Link</a></p></div>
+                                </div>
+                            </div>
+                            </div>
+
+                        </div>
+
+<!--                        <ul class="react-multi-carousel-track "-->
+<!--                            style="transition: none 0s ease 0s; overflow: unset; transform: translate3d(0px, 0px, 0px);display:inline-flex;">-->
+<!--                            <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item&#45;&#45;active image-item"-->
+<!--                                data-index="0"-->
+<!--                                style="flex: 1 1 auto; position: relative; width: 339px;">-->
+<!--                                <div class="blog-card"-->
+<!--                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">-->
+<!--                                    <div class="blog-card-seprator"></div>-->
+<!--                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>-->
+<!--                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected-->
+<!--                                            Patients tests for-->
+<!--                                            COVID were administered.</p><a class="blog-card-readnow"-->
+<!--                                                                           href="/singleblog/News Title">Read Now</a>-->
+<!--                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"-->
+<!--                                                                                      rel="noreferrer" target="_blank">Source-->
+<!--                                            Link</a></p></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item&#45;&#45;active image-item"-->
+<!--                                data-index="1"-->
+<!--                                style="flex: 1 1 auto; position: relative; width: 339px;">-->
+<!--                                <div class="blog-card"-->
+<!--                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">-->
+<!--                                    <div class="blog-card-seprator"></div>-->
+<!--                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>-->
+<!--                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected-->
+<!--                                            Patients tests for-->
+<!--                                            COVID were administered.</p><a class="blog-card-readnow"-->
+<!--                                                                           href="/singleblog/News Title">Read Now</a>-->
+<!--                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"-->
+<!--                                                                                      rel="noreferrer" target="_blank">Source-->
+<!--                                            Link</a></p></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item&#45;&#45;active image-item"-->
+<!--                                data-index="2"-->
+<!--                                style="flex: 1 1 auto; position: relative; width: 339px;">-->
+<!--                                <div class="blog-card"-->
+<!--                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">-->
+<!--                                    <div class="blog-card-seprator"></div>-->
+<!--                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>-->
+<!--                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected-->
+<!--                                            Patients tests for-->
+<!--                                            COVID were administered.</p><a class="blog-card-readnow"-->
+<!--                                                                           href="/singleblog/News Title">Read Now</a>-->
+<!--                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"-->
+<!--                                                                                      rel="noreferrer" target="_blank">Source-->
+<!--                                            Link</a></p></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item&#45;&#45;active image-item"-->
+<!--                                data-index="3"-->
+<!--                                style="flex: 1 1 auto; position: relative; width: 339px;">-->
+<!--                                <div class="blog-card"-->
+<!--                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">-->
+<!--                                    <div class="blog-card-seprator"></div>-->
+<!--                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>-->
+<!--                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected-->
+<!--                                            Patients tests for-->
+<!--                                            COVID were administered.</p><a class="blog-card-readnow"-->
+<!--                                                                           href="/singleblog/News Title">Read Now</a>-->
+<!--                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"-->
+<!--                                                                                      rel="noreferrer" target="_blank">Source-->
+<!--                                            Link</a></p></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div aria-hidden="false" class="react-multi-carousel-item react-multi-carousel-item&#45;&#45;active image-item"-->
+<!--                                data-index="4"-->
+<!--                                style="flex: 1 1 auto; position: relative; width: 339px;">-->
+<!--                                <div class="blog-card"-->
+<!--                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">-->
+<!--                                    <div class="blog-card-seprator"></div>-->
+<!--                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>-->
+<!--                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected-->
+<!--                                            Patients tests for-->
+<!--                                            COVID were administered.</p><a class="blog-card-readnow"-->
+<!--                                                                           href="/singleblog/News Title">Read Now</a>-->
+<!--                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"-->
+<!--                                                                                      rel="noreferrer" target="_blank">Source-->
+<!--                                            Link</a></p></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div aria-hidden="true" class="react-multi-carousel-item  image-item" data-index="5"-->
+<!--                                style="flex: 1 1 auto; position: relative; width: 339px;">-->
+<!--                                <div class="blog-card"-->
+<!--                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">-->
+<!--                                    <div class="blog-card-seprator"></div>-->
+<!--                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>-->
+<!--                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected-->
+<!--                                            Patients tests for-->
+<!--                                            COVID were administered.</p><a class="blog-card-readnow"-->
+<!--                                                                           href="/singleblog/News Title">Read Now</a>-->
+<!--                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"-->
+<!--                                                                                      rel="noreferrer" target="_blank">Source-->
+<!--                                            Link</a></p></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div aria-hidden="true" class="react-multi-carousel-item  image-item" data-index="6"-->
+<!--                                style="flex: 1 1 auto; position: relative; width: 339px;">-->
+<!--                                <div class="blog-card"-->
+<!--                                     style="background-image: url(&quot;https://images.unsplash.com/photo-1597614773588-543592d2c5f8?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=632&amp;q=80&quot;);">-->
+<!--                                    <div class="blog-card-seprator"></div>-->
+<!--                                    <div class="blog-card-body"><h6 class="blog-card-title">News Title</h6>-->
+<!--                                        <p class="blog-card-excerpt">There are currently 6,445,494 Currently Infected-->
+<!--                                            Patients tests for-->
+<!--                                            COVID were administered.</p><a class="blog-card-readnow"-->
+<!--                                                                           href="/singleblog/News Title">Read Now</a>-->
+<!--                                        <p class="blog-card-source"><b>Source:</b> <a href="https://www.google.com/"-->
+<!--                                                                                      rel="noreferrer" target="_blank">Source-->
+<!--                                            Link</a></p></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </ul>-->
+
+                    </div>
+                </div>
+            </div>
+            <div class="small-container">
+                <div class="section-layout section-layout-padding"><h2 class="section-title">United State Changes in
+                    Small Business Revenue </h2><h6 class="section-subtitle">In New York, as of August 01 2020, total
+                    small business revenue decreased by 28.1% compared to January 2020. </h6>
+                    <p class="section-date">Last updated:{{updated_date.date}} a.m. ET</p>
+                    <p class="section-paragrapgh">In the United States, as of August 01 2020, total small business
+                        revenue decreased by 18.6% compared to January 2020.</p></div>
+                <div class="singleline-chart-card-wrapper">
+                    <div class="single-chart-card"><h4 class="chart-card-title">United States changes in Small Business
+                        Revenue</h4><h6 class="chart-card-subtitle">Updated: {{updated_date.date}}</h6>
+                        <div class="chart-card-paragraph"><p>In the United States, as of August 01 2020, transportation
+                            and trade small business revenue decreased by 9% compared to January 2020.</p>
+                            <p>Education &amp; Health Services, Leisurre &amp; Hospitality, Retail &amp;
+                                Transportation </p></div>
+                        <div class="chart-area">
+                            <div id="business-revenue-chart" style="width: 100%; height: 300px;">
+                                <div style="width: 100%; height: 100%; position: relative; left: -0.5px; top: -0.140625px;">
+                                   <div id="lineChart_business"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="small-container   ">
+                <div class="section-layout section-layout-padding"><h2 class="section-title">About {United States}</h2>
+                    <a href="https://www.whitehouse.gov " rel="noreferrer" target="_blank">Visit</a></div>
+                <div class="image-wrapper mb-normal mt-normal">
+                    <div class=" gatsby-image-wrapper" style="position: relative; overflow: hidden;">
+                        <div aria-hidden="true" style="width: 100%; padding-bottom: 51.6%;"></div>
+                        {% load static %}
+                        <img alt=""
+                             src="{% static '/country-flag/United State.png' %}"
+                             aria-hidden="true"
+                             style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: cover; object-position: center center; opacity: 1; transition-delay: 500ms;">
+                    </div>
+                </div>
+                <div class="section-layout section-layout-padding"><p class="section-paragrapgh">The United States of
+                    America, commonly known as the United States or America, is a country mostly located in central
+                    North America, between Canada and Mexico. It consists of 50 states, a federal district, five major
+                    self-governing territories, and various possessions.</p>
+                    <p class="section-paragrapgh">The current population of the United States of America is {{updated_date.population}}
+                        as of  {{updated_date.date}} based on Worldometer elaboration of the latest United Nations
+                        data. </p>
+                    <p class="section-paragrapgh">The United States 2020 population is estimated at  {{updated_date.population}} people
+                        at mid year according to UN data.</p>
+                    <p class="section-paragrapgh">The United States population is equivalent to 4.25% of the total world
+                        population.</p>
+                    <p class="section-paragrapgh">The U.S.A. ranks number 3 in the list of countries (and dependencies)
+                        by population. The population density in the United States is 36 per Km2 (94 people per
+                        mi2).</p>
+                    <p class="section-paragrapgh">The total land area is 9,147,420 Km2 (3,531,837 sq. miles)</p>
+                    <p class="section-paragrapgh"> 82.8 % of the population is urban (273,975,139 people in 2020)</p>
+                    <p class="section-paragrapgh">The median age in the United States is 38.3 years.</p></div>
+            </div>
+        </main>
+
+
+    </div>
+    {% include 'footer.html' %}
+</div>
+<!-- Resources -->
+
+
+<!---->
+
+<!-- Graphs Plotor Key indicator -->
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("keyindicator_popolation", am4charts.XYChart);
+
+
+<!--chart.exporting.menu = new am4core.ExportMenu();-->
+
+actcase = {{ act_cases | safe }}
+actdate = {{ act_date | safe }}
+actdeath = {{ act_death | safe }}
+actpopulation = {{ act_population | safe }}
+
+
+var data = [];
+var year = "";
+var income = "";
+var expenses = "";
+
+for(var i = 0; i < actcase.length; i++){
+  year =actdate[i]
+  income = actpopulation[i];
+  expenses = actdeath[i];
+  data.push({year:year, income:income});
+
+}
+
+chart.data = data;
+/* Create axes */
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "year";
+categoryAxis.renderer.minGridDistance = 30;
+
+/* Create value axis */
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+/* Create series */
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "income";
+columnSeries.dataFields.categoryX = "year";
+
+columnSeries.columns.template.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+var lineSeries = chart.series.push(new am4charts.LineSeries());
+lineSeries.name = "Expenses";
+lineSeries.dataFields.valueY = "expenses";
+lineSeries.dataFields.categoryX = "year";
+
+lineSeries.stroke = am4core.color("#fdd400");
+lineSeries.strokeWidth = 3;
+lineSeries.propertyFields.strokeDasharray = "lineDash";
+lineSeries.tooltip.label.textAlign = "middle";
+
+var bullet = lineSeries.bullets.push(new am4charts.Bullet());
+bullet.fill = am4core.color("#fdd400"); // tooltips grab fill from parent by default
+bullet.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+var circle = bullet.createChild(am4core.Circle);
+circle.radius = 4;
+circle.fill = am4core.color("#fff");
+circle.strokeWidth = 3;
+
+chart.scrollbarX = new am4core.Scrollbar();
+chart.scrollbarX.parent = chart.bottomAxesContainer;
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("keyindicator", am4charts.XYChart);
+
+
+<!--chart.exporting.menu = new am4core.ExportMenu();-->
+actcase = {{ act_cases | safe }}
+actdate = {{ act_date | safe }}
+actdeath = {{ act_death | safe }}
+
+console.log("==========================act casess =====================")
+console.log(actcase)
+
+var data = [];
+var year = "";
+var income = "";
+var expenses = "";
+
+for(var i = 0; i < actcase.length; i++){
+  year =actdate[i]
+  income = actcase[i];
+  expenses = actdeath[i];
+  data.push({year:year, income:income});
+
+}
+
+chart.data = data;
+/* Create axes */
+
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "year";
+categoryAxis.renderer.minGridDistance = 30;
+
+/* Create value axis */
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+/* Create series */
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "income";
+columnSeries.dataFields.categoryX = "year";
+
+columnSeries.columns.template.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+var lineSeries = chart.series.push(new am4charts.LineSeries());
+lineSeries.name = "Expenses";
+lineSeries.dataFields.valueY = "expenses";
+lineSeries.dataFields.categoryX = "expenses";
+
+lineSeries.stroke = am4core.color("#fdd400");
+lineSeries.strokeWidth = 3;
+lineSeries.propertyFields.strokeDasharray = "lineDash";
+lineSeries.tooltip.label.textAlign = "middle";
+
+var bullet = lineSeries.bullets.push(new am4charts.Bullet());
+bullet.fill = am4core.color("#fdd400"); // tooltips grab fill from parent by default
+bullet.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+var circle = bullet.createChild(am4core.Circle);
+circle.radius = 4;
+circle.fill = am4core.color("#fff");
+circle.strokeWidth = 3;
+
+chart.scrollbarX = new am4core.Scrollbar();
+chart.scrollbarX.parent = chart.bottomAxesContainer;
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("keyindicator2", am4charts.XYChart);
+
+<!--chart.exporting.menu = new am4core.ExportMenu();-->
+actcase = {{ act_cases | safe }}
+actdate = {{ act_date | safe }}
+actdeath = {{ act_death | safe }}
+
+console.log("==========================act casess =====================")
+console.log(actcase)
+
+var data = [];
+var year = "";
+var income = "";
+var expenses = "";
+
+for(var i = 0; i < actcase.length; i++){
+  year =actdate[i]
+  income = actcase[i];
+  expenses = actdeath[i];
+  data.push({year:year, income:income});
+
+}
+
+chart.data = data;
+/* Create axes */
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "year";
+categoryAxis.renderer.minGridDistance = 30;
+
+/* Create value axis */
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+/* Create series */
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "income";
+columnSeries.dataFields.categoryX = "year";
+
+columnSeries.columns.template.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+var lineSeries = chart.series.push(new am4charts.LineSeries());
+lineSeries.name = "Expenses";
+lineSeries.dataFields.valueY = "expenses";
+lineSeries.dataFields.categoryX = "year";
+
+lineSeries.stroke = am4core.color("#fdd400");
+lineSeries.strokeWidth = 3;
+lineSeries.propertyFields.strokeDasharray = "lineDash";
+lineSeries.tooltip.label.textAlign = "middle";
+
+var bullet = lineSeries.bullets.push(new am4charts.Bullet());
+bullet.fill = am4core.color("#fdd400"); // tooltips grab fill from parent by default
+bullet.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+var circle = bullet.createChild(am4core.Circle);
+circle.radius = 4;
+circle.fill = am4core.color("#fff");
+circle.strokeWidth = 3;
+
+chart.scrollbarX = new am4core.Scrollbar();
+chart.scrollbarX.parent = chart.bottomAxesContainer;
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("keyindicator3", am4charts.XYChart);
+
+<!--chart.exporting.menu = new am4core.ExportMenu();-->
+actcase = {{ act_cases | safe }}
+actdate = {{ act_date | safe }}
+actdeath = {{ act_infection | safe }}
+
+console.log("==========================act casess keyindicator3 =====================")
+console.log(actcase)
+
+var data = [];
+var year = "";
+var income = "";
+var expenses = "";
+
+for(var i = 0; i < actcase.length; i++){
+  year =actdate[i]
+  income = actcase[i];
+  expenses = actdeath[i];
+  data.push({year:year, income:income});
+
+}
+
+chart.data = data;
+/* Create axes */
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "year";
+categoryAxis.renderer.minGridDistance = 30;
+
+/* Create value axis */
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+/* Create series */
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "income";
+columnSeries.dataFields.categoryX = "year";
+
+columnSeries.columns.template.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+var lineSeries = chart.series.push(new am4charts.LineSeries());
+lineSeries.name = "Expenses";
+lineSeries.dataFields.valueY = "expenses";
+lineSeries.dataFields.categoryX = "year";
+
+lineSeries.stroke = am4core.color("#fdd400");
+lineSeries.strokeWidth = 3;
+lineSeries.propertyFields.strokeDasharray = "lineDash";
+lineSeries.tooltip.label.textAlign = "middle";
+
+var bullet = lineSeries.bullets.push(new am4charts.Bullet());
+bullet.fill = am4core.color("#fdd400"); // tooltips grab fill from parent by default
+bullet.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+var circle = bullet.createChild(am4core.Circle);
+circle.radius = 4;
+circle.fill = am4core.color("#fff");
+circle.strokeWidth = 3;
+
+chart.scrollbarX = new am4core.Scrollbar();
+chart.scrollbarX.parent = chart.bottomAxesContainer;
+
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("keyindicator4", am4charts.XYChart);
+
+<!--chart.exporting.menu = new am4core.ExportMenu();-->
+actcase = {{ act_cases | safe }}
+actdate = {{ act_date | safe }}
+actdeath = {{ testPositivityRatio | safe }}
+
+console.log("==========================act casess positive is working =====================")
+console.log(actcase)
+
+var data = [];
+var year = "";
+var income = "";
+var expenses = "";
+
+for(var i = 0; i < actcase.length; i++){
+  year =actdate[i]
+  income = actcase[i];
+  expenses = actdeath[i];
+  data.push({year:year, income:income});
+
+}
+
+chart.data = data;
+/* Create axes */
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "year";
+categoryAxis.renderer.minGridDistance = 30;
+
+/* Create value axis */
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+/* Create series */
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "income";
+columnSeries.dataFields.categoryX = "year";
+
+columnSeries.columns.template.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+var lineSeries = chart.series.push(new am4charts.LineSeries());
+lineSeries.name = "Expenses";
+lineSeries.dataFields.valueY = "expenses";
+lineSeries.dataFields.categoryX = "year";
+
+lineSeries.stroke = am4core.color("#fdd400");
+lineSeries.strokeWidth = 3;
+lineSeries.propertyFields.strokeDasharray = "lineDash";
+lineSeries.tooltip.label.textAlign = "middle";
+
+var bullet = lineSeries.bullets.push(new am4charts.Bullet());
+bullet.fill = am4core.color("#fdd400"); // tooltips grab fill from parent by default
+bullet.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+var circle = bullet.createChild(am4core.Circle);
+circle.radius = 4;
+circle.fill = am4core.color("#fff");
+circle.strokeWidth = 3;
+
+chart.scrollbarX = new am4core.Scrollbar();
+chart.scrollbarX.parent = chart.bottomAxesContainer;
+
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("keyindicator5", am4charts.XYChart);
+
+<!--chart.exporting.menu = new am4core.ExportMenu();-->
+actcase = {{ act_cases | safe }}
+actdate = {{ act_date | safe }}
+actdeath = {{ act_death | safe }}
+
+console.log("==========================act casess =====================")
+console.log(actcase)
+
+var data = [];
+var year = "";
+var income = "";
+var expenses = "";
+
+for(var i = 0; i < actcase.length; i++){
+  year =actdate[i]
+  income = actcase[i];
+  expenses = actdeath[i];
+  data.push({year:year, income:income});
+
+}
+
+chart.data = data;
+/* Create axes */
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "year";
+categoryAxis.renderer.minGridDistance = 30;
+
+/* Create value axis */
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+/* Create series */
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "income";
+columnSeries.dataFields.categoryX = "year";
+
+columnSeries.columns.template.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+var lineSeries = chart.series.push(new am4charts.LineSeries());
+lineSeries.name = "Expenses";
+lineSeries.dataFields.valueY = "expenses";
+lineSeries.dataFields.categoryX = "year";
+
+lineSeries.stroke = am4core.color("#fdd400");
+lineSeries.strokeWidth = 3;
+lineSeries.propertyFields.strokeDasharray = "lineDash";
+lineSeries.tooltip.label.textAlign = "middle";
+
+var bullet = lineSeries.bullets.push(new am4charts.Bullet());
+bullet.fill = am4core.color("#fdd400"); // tooltips grab fill from parent by default
+bullet.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+var circle = bullet.createChild(am4core.Circle);
+circle.radius = 4;
+circle.fill = am4core.color("#fff");
+circle.strokeWidth = 3;
+
+chart.scrollbarX = new am4core.Scrollbar();
+chart.scrollbarX.parent = chart.bottomAxesContainer;
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("keyindicator6", am4charts.XYChart);
+
+<!--chart.exporting.menu = new am4core.ExportMenu();-->
+actcase = {{ act_cases | safe }}
+actdate = {{ act_date | safe }}
+actdeath = {{ act_death | safe }}
+
+console.log("==========================act casess =====================")
+console.log(actcase)
+
+var data = [];
+var year = "";
+var income = "";
+var expenses = "";
+
+for(var i = 0; i < actcase.length; i++){
+  year =actdate[i]
+  income = actcase[i];
+  expenses = actdeath[i];
+  data.push({year:year, income:income});
+
+}
+
+chart.data = data;
+/* Create axes */
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "year";
+categoryAxis.renderer.minGridDistance = 30;
+
+/* Create value axis */
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+/* Create series */
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "income";
+columnSeries.dataFields.categoryX = "year";
+
+columnSeries.columns.template.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+var lineSeries = chart.series.push(new am4charts.LineSeries());
+lineSeries.name = "Expenses";
+lineSeries.dataFields.valueY = "expenses";
+lineSeries.dataFields.categoryX = "year";
+
+lineSeries.stroke = am4core.color("#fdd400");
+lineSeries.strokeWidth = 3;
+lineSeries.propertyFields.strokeDasharray = "lineDash";
+lineSeries.tooltip.label.textAlign = "middle";
+
+var bullet = lineSeries.bullets.push(new am4charts.Bullet());
+bullet.fill = am4core.color("#fdd400"); // tooltips grab fill from parent by default
+bullet.tooltipText = "[#fff font-size: 15px]{name} in {categoryX}:\n[/][#fff font-size: 20px]{valueY}[/] [#fff]{additional}[/]"
+var circle = bullet.createChild(am4core.Circle);
+circle.radius = 4;
+circle.fill = am4core.color("#fff");
+circle.strokeWidth = 3;
+
+chart.scrollbarX = new am4core.Scrollbar();
+chart.scrollbarX.parent = chart.bottomAxesContainer;
+
+
+}); // end am4core.ready()
+</script>
+<!--end key indicator-->
+<script>
+
+<!--  $.getJSON('http://127.0.0.1:8001/united_states/', function(data) {-->
+<!--         text = data.date-->
+<!--         alert(text)-->
+<!--         $.ajax({-->
+<!--                type:'GET',-->
+<!--                 datatype:'json',-->
+<!--                    // handle a successful response-->
+<!--                success : function(data) {-->
+<!--                if (context.userdata) {-->
+<!--                                        alert("test")-->
+<!--                            }-->
+<!--                },-->
+<!--    });-->
+<!-- var received_data = "{{usData}}";-->
+<!--    var received_data = json.parse(received_data)-->
+<!--    console.log(received_data);-->
+<!--    console.log(JSON.parse(received_data).serializeArray());-->
+<!--    for(var i=0;i<=received_data.length;i++){-->
+<!--        console.log(received_data);-->
+<!--    }-->
+        am4core.ready(function() {
+        // Themes begin
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        var chart = am4core.create("lineChart123", am4charts.XYChart);
+
+        var data = [];
+
+        var value = 50;
+
+        for(var i = 0; i < 300; i++){
+
+          var date = new Date();
+
+        <!--  date.setHours(0,0,0,0);-->
+
+          date.setDate(i);
+
+          value -= Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 10);
+
+          data.push({date:date, value: value});
+        }
+        console.log({{query}});
+<!--       // chart.data = {{query}};-->
+<!--        // Create axes-->
+        var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+        dateAxis.renderer.minGridDistance = 60;
+
+        var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+        // Create series
+        var series = chart.series.push(new am4charts.LineSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.dateX = "date";
+        series.tooltipText = "{value}"
+
+        series.tooltip.pointerOrientation = "vertical";
+
+        chart.cursor = new am4charts.XYCursor();
+        chart.cursor.snapToSeries = series;
+        chart.cursor.xAxis = dateAxis;
+
+        //chart.scrollbarY = new am4core.Scrollbar();
+        chart.scrollbarX = new am4core.Scrollbar();
+
+        }); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ data | safe }}
+var chart = am4core.create("lineChart1", am4charts.XYChart);
+
+var data = [];
+var value = 50;
+date = [];
+for(var i = 0; i < dat2.length; i++){
+
+  date =dat[i];
+  value = dat2[i];
+  data.push({date:date, value: value});
+
+}
+
+//data.push({dat:dat, dat2: dat2});
+    console.log(data)
+    chart.data = data;
+
+// Create axes
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+dateAxis.renderer.minGridDistance = 60;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+// Create series
+var series = chart.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "value";
+series.dataFields.dateX = "date";
+series.tooltipText = "{value}"
+
+series.tooltip.pointerOrientation = "vertical";
+
+chart.cursor = new am4charts.XYCursor();
+chart.cursor.snapToSeries = series;
+chart.cursor.xAxis = dateAxis;
+
+//chart.scrollbarY = new am4core.Scrollbar();
+chart.scrollbarX = new am4core.Scrollbar();
+
+});
+// end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ resid | safe }}
+var chart = am4core.create("lineChart2", am4charts.XYChart);
+
+var data = [];
+var value = 50;
+date = [];
+for(var i = 0; i < dat2.length; i++){
+
+  date =dat[i]
+
+<!--  date.setHours(0,0,0,0);-->
+
+<!--  date.setDate(i);-->
+
+  //value -= Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 10);
+  value = dat2[i];
+
+  data.push({date:date, value: value});
+
+}
+//data.push({dat:dat, dat2: dat2});
+console.log(data)
+chart.data = data;
+
+// Create axes
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+dateAxis.renderer.minGridDistance = 60;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+// Create series
+var series = chart.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "value";
+series.dataFields.dateX = "date";
+series.tooltipText = "{value}"
+
+series.tooltip.pointerOrientation = "vertical";
+
+chart.cursor = new am4charts.XYCursor();
+chart.cursor.snapToSeries = series;
+chart.cursor.xAxis = dateAxis;
+
+//chart.scrollbarY = new am4core.Scrollbar();
+chart.scrollbarX = new am4core.Scrollbar();
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart3", am4charts.XYChart);
+
+var data = [];
+var value = 50;
+date = [];
+for(var i = 0; i < dat2.length; i++){
+
+  date =dat[i]
+
+<!--  date.setHours(0,0,0,0);-->
+
+<!--  date.setDate(i);-->
+
+  //value -= Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 10);
+  value = dat2[i];
+
+  data.push({date:date, value: value});
+
+}
+//data.push({dat:dat, dat2: dat2});
+console.log(data)
+chart.data = data;
+
+// Create axes
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+dateAxis.renderer.minGridDistance = 60;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+// Create series
+var series = chart.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "value";
+series.dataFields.dateX = "date";
+series.tooltipText = "{value}"
+
+series.tooltip.pointerOrientation = "vertical";
+
+chart.cursor = new am4charts.XYCursor();
+chart.cursor.snapToSeries = series;
+chart.cursor.xAxis = dateAxis;
+
+//chart.scrollbarY = new am4core.Scrollbar();
+chart.scrollbarX = new am4core.Scrollbar();
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ park | safe }}
+var chart = am4core.create("lineChart4", am4charts.XYChart);
+
+var data = [];
+var value = 50;
+date = [];
+for(var i = 0; i < dat2.length; i++){
+
+  date =dat[i]
+
+<!--  date.setHours(0,0,0,0);-->
+
+<!--  date.setDate(i);-->
+
+  //value -= Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 10);
+  value = dat2[i];
+
+  data.push({date:date, value: value});
+
+}
+//data.push({dat:dat, dat2: dat2});
+console.log(data)
+chart.data = data;
+
+// Create axes
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+dateAxis.renderer.minGridDistance = 60;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+// Create series
+var series = chart.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "value";
+series.dataFields.dateX = "date";
+series.tooltipText = "{value}"
+
+series.tooltip.pointerOrientation = "vertical";
+
+chart.cursor = new am4charts.XYCursor();
+chart.cursor.snapToSeries = series;
+chart.cursor.xAxis = dateAxis;
+
+//chart.scrollbarY = new am4core.Scrollbar();
+chart.scrollbarX = new am4core.Scrollbar();
+
+}); // end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ transit | safe }}
+var chart = am4core.create("lineChart5", am4charts.XYChart);
+
+var data = [];
+var value = 50;
+date = [];
+for(var i = 0; i < dat2.length; i++){
+
+  date =dat[i]
+
+<!--  date.setHours(0,0,0,0);-->
+
+<!--  date.setDate(i);-->
+
+  //value -= Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 10);
+  value = dat2[i];
+
+  data.push({date:date, value: value});
+
+}
+//data.push({dat:dat, dat2: dat2});
+console.log(data)
+chart.data = data;
+
+// Create axes
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+dateAxis.renderer.minGridDistance = 60;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+// Create series
+var series = chart.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "value";
+series.dataFields.dateX = "date";
+series.tooltipText = "{value}"
+
+series.tooltip.pointerOrientation = "vertical";
+
+chart.cursor = new am4charts.XYCursor();
+chart.cursor.snapToSeries = series;
+chart.cursor.xAxis = dateAxis;
+
+//chart.scrollbarY = new am4core.Scrollbar();
+chart.scrollbarX = new am4core.Scrollbar();
+
+}); // end am4core.ready()
+</script>
+<script>
+    am4core.ready(function() {
+
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+    var dat = {{ label | safe }}
+    var dat2 = {{ work_place | safe }}
+    var chart = am4core.create("lineChart6", am4charts.XYChart);
+
+    var data = [];
+    var value = 50;
+    date = [];
+    for(var i = 0; i < dat2.length; i++){
+
+      date =dat[i]
+
+    <!--  date.setHours(0,0,0,0);-->
+
+    <!--  date.setDate(i);-->
+
+      //value -= Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 10);
+      value = dat2[i];
+
+      data.push({date:date, value: value});
+
+    }
+    //data.push({dat:dat, dat2: dat2});
+    console.log(data)
+    chart.data = data;
+
+    // Create axes
+    var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+    dateAxis.renderer.minGridDistance = 60;
+
+    var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+    // Create series
+    var series = chart.series.push(new am4charts.LineSeries());
+    series.dataFields.valueY = "value";
+    series.dataFields.dateX = "date";
+    series.tooltipText = "{value}"
+
+    series.tooltip.pointerOrientation = "vertical";
+
+    chart.cursor = new am4charts.XYCursor();
+    chart.cursor.snapToSeries = series;
+    chart.cursor.xAxis = dateAxis;
+
+    //chart.scrollbarY = new am4core.Scrollbar();
+    chart.scrollbarX = new am4core.Scrollbar();
+
+    }); // end am4core.ready()
+</script>
+
+<!-- consumer increased chart  -->
+<script>
+
+</script>
+<!-- consumer increased chart closed -->
+
+<!--economic imapct chart-->
+<script>
+am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+      am4core.color("#e54660"),
+
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart_economic", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+createSeries("value1", "{{ nationalEmploymentLow | safe | floatformat:2 }}");
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  //employee econimic
+
+  empLow = {{ emp_low | safe }}
+  empMiddle = {{ emp_middle | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+
+  //end
+
+  for (var i = 1; i < empLow.length; i++) {
+    //value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, empMonth[i], i) };
+    dataItem["value" + s] = empLow[i]
+    data.push(dataItem);
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});// end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+
+      am4core.color("#0c5c80"),
+
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart_economic_2", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+
+
+
+  createSeries("value2", "{{ nationalEmploymentMiddle | safe | floatformat:2 }}");
+
+
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  //employee econimic
+
+  empLow = {{ emp_low | safe }}
+  empMiddle = {{ emp_middle | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+
+  //end
+
+  for (var i = 1; i < 100; i++) {
+    //value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, empMonth[i], i) };
+    dataItem["value" + s] = empMiddle[i]
+    data.push(dataItem);
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});// end am4core.ready()
+</script>
+<script>
+am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+       am4core.color("#35b6a4"),
+
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart_economic_3", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+
+
+
+  createSeries("value3", "{{ nationalEmployment | safe | floatformat:2 }}");
+
+
+
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  //employee econimic
+
+  empLow = {{ emp_low | safe }}
+  empMiddle = {{ emp_middle | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+
+  //end
+
+  for (var i = 1; i < empLow.length; i++) {
+    //value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, empMonth[i], i) };
+    dataItem["value" + s] = empHigh[i]
+    data.push(dataItem);
+
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});// end am4core.ready()
+</script>
+<!--United state business consumer revenue -->
+<script>
+am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+      am4core.color("blue"),
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+
+var chart = am4core.create("lineChart_consumer", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+createSeries("value1", "{{ nationalEmploymentLow | safe | floatformat:2 }}");
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+
+  //employee econimic
+
+  emplow = {{ emp_low | safe }}
+  empMiddle = {{ spend_apparel | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+console.log("================")
+  //end
+
+ var data = [];
+  var value = 50
+
+  for (var i = 1; i < 100; i++) {
+    //value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, empMonth[i], i) };
+    dataItem["value" + s] = emplow[i]
+    data.push(dataItem);
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});
+// end am4core.ready()
+</script>
+<script>
+    am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+      am4core.color("green"),
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart_consumer_2", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+createSeries("value1", "{{ nationalEmploymentLow | safe | floatformat:2 }}");
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  //employee econimic
+
+  empLow = {{ spend_health_care | safe }}
+  empMiddle = {{ emp_middle | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+
+  //end
+
+ var value = Math.round(Math.random() * 100) + 100;
+  for (var i = 1; i < 100; i++) {
+    value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, 2, i) };
+    dataItem["value" + s] = value;
+    data.push(dataItem);
+  }
+  console.log("======== test apparel data =========\t\t\t")
+  console.log(data)
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});
+</script>
+<script>
+    am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+      am4core.color("red"),
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart_consumer_3", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+createSeries("value1", "{{ nationalEmploymentLow | safe | floatformat:2 }}");
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  //employee econimic
+
+  empLow = {{ emp_low | safe }}
+  empMiddle = {{ emp_middle | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+
+  //end
+
+  for (var i = 1; i < empLow.length; i++) {
+    //value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, empMonth[i], i) };
+    dataItem["value" + s] = empHigh[i]
+    data.push(dataItem);
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});
+</script>
+<script>
+    am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+      am4core.color("blue"),
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart_consumer_4", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+createSeries("value1", "{{ nationalEmploymentLow | safe | floatformat:2 }}");
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  //employee econimic
+
+  empLow = {{ emp_low | safe }}
+  empMiddle = {{ emp_middle | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+
+  //end
+
+  for (var i = 1; i < empLow.length; i++) {
+    //value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, empMonth[i], i) };
+    dataItem["value" + s] = empMiddle[i]
+    data.push(dataItem);
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});
+</script>
+<script>
+    am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+      am4core.color("orange"),
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+am4core.useTheme(am4themes_animated);
+
+// Themes end
+var dat = {{ label | safe }}
+var dat2 = {{ grocery | safe }}
+var chart = am4core.create("lineChart_consumer_5", am4charts.XYChart);
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+createSeries("value1", "{{ nationalEmploymentLow | safe | floatformat:2 }}");
+
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 4;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  //employee econimic
+
+  empLow = {{ emp_low | safe }}
+  empMiddle = {{ emp_middle | safe }}
+  empHigh = {{ emp_high | safe }}
+  empMonth = {{ emp_month | safe }}
+
+  //end
+
+  for (var i = 1; i < empLow.length; i++) {
+    //value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, empMonth[i], i) };
+    dataItem["value" + s] = empLow[i]
+    data.push(dataItem);
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});
+</script>
+<!-- map chart-->
+<!-- business  -->
+<script>
+    am4core.ready(function() {
+// Themes end
+function am4themes_businessTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+      am4core.color("#e54660"),
+      am4core.color("blue"),
+      am4core.color("green"),
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_businessTheme);
+
+
+
+// Create chart instance
+var chart = am4core.create("lineChart_business", am4charts.XYChart);
+
+// Create Axes //
+var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+createSeries("value1", "{{ spendeducation | safe | floatformat:2 }}");
+createSeries("value2", "{{ spendhospitality | safe | floatformat:2 }}");
+createSeries("value3", "{{ spendtransportation | safe | floatformat:2 }}");
+
+// Create series
+function createSeries(s, name) {
+  var series = chart.series.push(new am4charts.LineSeries());
+  series.dataFields.valueY = "value" + s;
+  series.dataFields.dateX = "date";
+  series.name = name;
+
+  var segment = series.segments.template;
+  segment.interactionsEnabled = true;
+
+  var hoverState = segment.states.create("hover");
+  hoverState.properties.strokeWidth = 3;
+
+  var dimmed = segment.states.create("dimmed");
+  dimmed.properties.stroke = am4core.color("#dadada");
+
+  segment.events.on("over", function(event) {
+    processOver(event.target.parent.parent.parent);
+  });
+
+  segment.events.on("out", function(event) {
+    processOut(event.target.parent.parent.parent);
+  });
+
+  var data = [];
+  var value = Math.round(Math.random() * 100) + 100;
+  for (var i = 1; i < 100; i++) {
+    value += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 30 + i / 5);
+    var dataItem = { date: new Date(2020, 3, i) };
+    dataItem["value" + s] = value;
+    data.push(dataItem);
+  }
+
+  series.data = data;
+  return series;
+}
+
+chart.legend = new am4charts.Legend();
+chart.legend.position = "right";
+chart.legend.scrollable = true;
+chart.legend.itemContainers.template.events.on("over", function(event) {
+  processOver(event.target.dataItem.dataContext);
+})
+
+chart.legend.itemContainers.template.events.on("out", function(event) {
+  processOut(event.target.dataItem.dataContext);
+})
+
+function processOver(hoveredSeries) {
+  hoveredSeries.toFront();
+
+  hoveredSeries.segments.each(function(segment) {
+    segment.setState("hover");
+  })
+
+  chart.series.each(function(series) {
+    if (series != hoveredSeries) {
+      series.segments.each(function(segment) {
+        segment.setState("dimmed");
+      })
+      series.bulletsContainer.setState("dimmed");
+    }
+  });
+}
+
+function processOut(hoveredSeries) {
+  chart.series.each(function(series) {
+    series.segments.each(function(segment) {
+      segment.setState("default");
+    })
+    series.bulletsContainer.setState("default");
+  });
+}
+
+});
+</script>
+<!-- end -->
+<script>
+am4core.ready(function() {
+function am4themes_myTheme(target) {
+  if (target instanceof am4core.ColorSet) {
+    target.list = [
+    //#004374
+    // red #f94340;
+            am4core.color("red"),
+
+    ];
+  }
+}
+// Themes begin
+am4core.useTheme(am4themes_myTheme);
+// Themes end
+
+ // Create map instance
+var chart = am4core.create("usstatemap", am4maps.MapChart);
+
+// Set map definition
+chart.geodata = am4geodata_usaLow;
+
+// Set projection
+chart.projection = new am4maps.projections.AlbersUsa();
+
+
+var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+// Create map polygon series polygonSeries
+
+//Set min/max fill color for each area
+polygonSeries.heatRules.push({
+  property: "fill",
+  target: polygonSeries.mapPolygons.template,
+  min: chart.colors.getIndex(1).brighten(-0.3),
+  max: chart.colors.getIndex(1).brighten(3)
+});
+
+// Make map load polygon data (state shapes and names) from GeoJSON
+    polygonSeries.useGeodata = true;
+    stateName = {{ allStateName | safe }}
+    statePopulation = {{ allStatePopulation | safe }}
+
+
+    var data = [];
+    var id = "";
+    var value = "";
+    var expenses = "";
+
+    for(var i = 0; i < stateName.length; i++){
+      year =actdate[i]
+      //e.,g "US-"+actdate[i]
+      id ="US-"+actdate[i];
+      url="https://nomanilyas.pythonanywhere.com/states/"+actdate[i]
+      value = actdeath[i];
+      console.log(url);
+      data.push({id:id, value:value,url:url});
+
+    }
+    console.log("==== state from us ap =======\t\t\t",data)
+    // Set heatmap values for each state
+    polygonSeries.data = data;
+    var series
+
+// this function will take current images on the map and create HTML elements for them
+
+// this function creates and returns a new marker element
+function createCustomMarker() {
+
+ // var chart = series.dataItem.component.chart;
+
+  // create holder
+  var holder = document.createElement('a');
+  holder.className = 'map-marker';
+  holder.title = image.dataItem.dataContext.title;
+  holder.style.position = 'absolute';
+  holder.href = 'www.google.com';
+  holder.target = '_parent';
+
+
+   }//Set up heat legend
+let heatLegend = chart.createChild(am4maps.HeatLegend);
+heatLegend.series = polygonSeries;
+heatLegend.align = "right";
+heatLegend.valign = "bottom";
+heatLegend.width = am4core.percent(20);
+heatLegend.marginRight = am4core.percent(4);
+heatLegend.minValue = 0;
+heatLegend.maxValue = 400;
+
+// Set up custom heat map legend labels using axis ranges
+var minRange = heatLegend.valueAxis.axisRanges.create();
+minRange.value = heatLegend.minValue;
+minRange.label.text = "min";
+var maxRange = heatLegend.valueAxis.axisRanges.create();
+maxRange.value = heatLegend.maxValue;
+maxRange.label.text = "max";// Set up custom heat map legend labels using axis ranges
+
+
+// Blank out internal heat legend value axis labels
+heatLegend.valueAxis.renderer.labels.template.adapter.add("text", function(labelText) {
+  return "";
+});
+
+// Configure series tooltip
+var polygonTemplate = polygonSeries.mapPolygons.template;
+polygonTemplate.tooltipText = "{name}: {value}";
+polygonTemplate.propertyFields.url = "url";
+polygonTemplate.propertyFields.urlTarget = "_blank";
+
+polygonTemplate.nonScalingStroke = true;
+polygonTemplate.strokeWidth = 0.5;
+
+// Create hover state and set alternative fill color
+var hs = polygonTemplate.states.create("hover");
+hs.properties.fill = chart.colors.getIndex(0).brighten(-0.1);
+
+
+
+}); // end am4core.ready()
+</script>
+<!-- Chart code -->
+<!--data table-->
+ <script>
+        $(document).ready(function() {
+        var table = $('#example').DataTable({
+            scrollY:        "900px",
+            scrollX:        true,
+            scrollCollapse: true,
+            paging:         false,
+            fixedColumns:   {
+                leftColumns: 1,
+                rightColumns: 0,
+            }
+        });
+    });
+    </script>
+<!--/-->

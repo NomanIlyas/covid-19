@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% load static %}
+{% include 'head.html'%}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<body>
+<div class="site-wrapper">
+
+    {% include 'header.html'%}
+    <div class="site-wrapper mt-5">
+        <main>
+            <div class="small-container">
+
+                <div class="news-row row">
+                    <div class="appnd-news"></div>
+                </div>
+                <div class="news-row-footer">
+<!--                    <nav aria-label="Countries Pagination">-->
+<!--                        <ul class="pagination">-->
+<!--                            <li class="page-item active"><a class="page-link" href="#">1</a></li>-->
+<!--                            <li class="page-item"><a class="page-link" href="#">2</a></li>-->
+<!--                            <li class="page-item"><a class="page-link" href="#">3</a></li>-->
+<!--                            <li class="page-item"><a class="page-link" href="#">4</a></li>-->
+<!--                            <li class="page-item"><a class="page-link" href="#">5</a></li>-->
+<!--                            <li class="page-item"><a class="page-link" href="#">6</a></li>-->
+<!--                            <li class="page-item"><a class="page-link" href="#">7</a></li>-->
+<!--                            <li class="page-item next"><a aria-label="Next" class="page-link" href="#"><span>Next</span></a>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </nav>-->
+                </div>
+            </div>
+        </main>
+    </div>
+    {% include 'footer.html' %}
+</div>
+</body>
+ <script type="text/javascript">
+        var settings = {
+	"async": true,
+	"crossDomain": true,
+	"url": "https://covid-19-news.p.rapidapi.com/v1/covid?lang=en&media=True&q=covid",
+	"method": "GET",
+	"headers": {
+		"x-rapidapi-host": "covid-19-news.p.rapidapi.com",
+		"x-rapidapi-key": "746fb824e2msh4c462d8e5db524ap14cbabjsne1b791a05a74"
+	}
+}
+
+$.ajax(settings).done(function (response) {
+	console.log(response);
+	var news_id = 0
+	newsId = 0
+    $.each(response['articles'],function( index, value ){
+
+        console.log(value);
+        value['media'];
+       $(".appnd-news").after(`
+       <div class="news-card column col-md-5"><a class="news-card-wrapper" id="`+newsId+`"href="` +value['link']+ `">
+                        <div class="news-card-img-wrapper"><img alt="`+ value['title'] +`" src="`+ value['media'] +`">
+                        </div>
+                        <div class="news-card-body"><h3 class="news-card-title">` + value['title'] + `</h3>
+                            <p class="news-card-paragraph">`+ value['summary']+ `</p>
+                            <div class="post-meta"><span class="post-date">`+ value['published_date'] +`</span></div>
+                        </div>
+                    </a>
+                    </div>
+       `)
+        newsId = news_id+1
+    });
+});
+    </script>
+</html>

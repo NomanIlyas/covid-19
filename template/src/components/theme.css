@@ -1,0 +1,39 @@
+.mb-huge {
+  margin-bottom: 40px;
+}
+.mb-big {
+  margin-bottom: 30px;
+}
+.mb-normal {
+  margin-bottom: 20px;
+}
+.mb-small {
+  margin-bottom: 10px;
+}
+.mb-tiny {
+  margin-bottom: 5px;
+}
+.mt-huge {
+  margin-top: 40px;
+}
+.mt-big {
+  margin-top: 30px;
+}
+.mt-normal {
+  margin-top: 20px;
+}
+.mt-small {
+  margin-top: 10px;
+}
+.mt-tiny {
+  margin-top: 5px;
+}
+.d-flex {
+  display: flex;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.align-center {
+  align-items: center;
+}
